@@ -1,10 +1,10 @@
 # cencr
 C/C++ source code encryption/mangling/minify
 
-##Installation
+## Installation
 npm install -g
 
-##Usage
+## Usage
 `cencr my_config.json`
 
 This will encrypt all files specified in the configuration file. It will also generate some json files with information about the encryption.

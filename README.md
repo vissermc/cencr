@@ -11,7 +11,7 @@ This will encrypt all files specified in the configuration file. It will also ge
 
 The tool uses a tokenizer, but does not fully compile your code. Therefore, it does not need to know definitions, but it does need to know all locations where it can find the source files, header files, and external header files.
 
-##Configuration file
+## Configuration file
 The json file should contain a list of properties:
 
 ```

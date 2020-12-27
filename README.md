@@ -1,6 +1,10 @@
 # cencr
 C/C++ source code encryption/mangling/minify
 
+It will remove all comments and will mangle all symbols in your code that might explain what it does. It will detect whether a symbol comes from an external header file, or whether it belongs to the specified list of sources.
+
+The tool uses a tokenizer, but does not fully compile your code. Therefore, it does not need to know definitions, but it does need to know all locations where it can find the source files, header files, and external header files.
+
 ## Installation
 npm install -g
 
@@ -8,8 +12,6 @@ npm install -g
 `cencr my_config.json`
 
 This will encrypt all files specified in the configuration file. It will also generate some json files with information about the encryption.
-
-The tool uses a tokenizer, but does not fully compile your code. Therefore, it does not need to know definitions, but it does need to know all locations where it can find the source files, header files, and external header files.
 
 ## Configuration file
 The json file should contain a list of properties:

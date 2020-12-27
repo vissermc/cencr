@@ -1,0 +1,24 @@
+{
+  "headers": [
+    "example/test.h",
+    "example/test2.h"
+  ],
+  "sources": [
+    "example/test.cpp"
+  ],
+  "outDir": "out",
+  "symbolOutPrefix": "XZ",
+  "encryptFilenames": true,
+  "fileOutPrefix": "enc_",
+  "excludedSymbols": [
+    "excluded1"
+  ],
+  "excludedFiles": [
+  ],
+  "searchDirs": [
+    "c:/dev/linux/2.6.32-279.el6.x86_64/include",
+    "c:/dev/linux/2.6.32-279.el6.x86_64/arch/x86/include",
+    "c:/dev/linux/2.6.32-279.el6.x86_64/arch/x86/asm",
+    "c:/cygwin64/usr/include"
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "name": "cencr",
+  "name": "@vissermc/cencr",
   "version": "1.0.0",
   "description": "C++ encrypter",
   "main": "index.js",
@@ -7,12 +7,25 @@
     "test": "jest"
   },
   "bin": {
-    "cencr": "./index.js"
+    "cencr": "index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vissermc/cencr.git"
   },
   "author": "Michiel Visser",
   "license": "MIT",
   "dependencies": {
     "c-tokenizer": "^1.0.0",
     "jest": "^25.1.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/vissermc/cencr/issues"
+  },
+  "homepage": "https://github.com/vissermc/cencr#readme",
+  "devDependencies": {},
+  "keywords": [
+    "C++",
+    "obfuscation"
+  ]
 }

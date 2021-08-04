@@ -75,13 +75,13 @@ class Cencr {
         });
     }
 
-    resolvePath(dir) {
+    resolvePath(dir, rPath='') {
         if (fs.existsSync(dir)) return path.normalize(dir);
         for (const d of this.config.searchDirs) {
             const p = pathJoin(d, dir);
             if (fs.existsSync(p)) return path.normalize(p);
         }
-        console.log(`Cannot find file ${dir}. Skipping...`);
+        console.log(`${rPath} Cannot find file ${dir}. Skipping...`);
         return null;
     }
 
@@ -90,11 +90,11 @@ class Cencr {
         return p && fs.readFileSync(p, 'utf-8');
     }
 
-    async processIncludeFile(dir) {
-        const rp = this.resolvePath(dir);
+    async processIncludeFile(dir, rPath='') {
+        const rp = this.resolvePath(dir, rPath);
         if (rp && !this.includeFiles[rp]) {
             this.includeFiles[rp] = true;
-            const symbols = await this.extractSymbolsFromFile(rp);
+            const symbols = await this.extractSymbolsFromFile(rp, rPath);
             Object.assign(this.sharedSymbols, symbols);
         }
     }
@@ -155,19 +155,19 @@ class Cencr {
         });
     }
 
-    async processIncludes(text) {
+    async processIncludes(text, rPath='') {
         if (text == null) return;
         const includes = [];
         await this.parse(text, dir => includes.push(dir), null, null);
         for (const i of includes) {
-            await this.processIncludeFile(i);
+            await this.processIncludeFile(i, rPath);
         }
     }
 
-    async extractfileSymbols(text) {
-        await this.processIncludes(text);
+    async extractfileSymbols(text, rPath='') {
+        await this.processIncludes(text, rPath);
         const symbols = {};
-        await this.parse(text, dir => this.processIncludeFile(dir), s => {
+        await this.parse(text, dir => this.processIncludeFile(dir, rPath), s => {
             symbols[s] = true;
         }, null);
         return symbols;
@@ -210,11 +210,12 @@ class Cencr {
         Object.keys(this.sharedSymbols).forEach(k => delete symbols[k]);
     }
 
-    async extractSymbolsFromFile(file) {
+    async extractSymbolsFromFile(file, rPath='') {
+        rPath += file.split(/[/\\]/g).pop() + ':';
         try {
-            return await this.extractfileSymbols(this.readFile(file));
+            return await this.extractfileSymbols(this.readFile(file), rPath);
         } catch (err) {
-            console.log(file + ': ' + err);
+            console.log(`${rPath} ${err}`);
             return {};
         }
     }

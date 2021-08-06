@@ -76,6 +76,7 @@ class Cencr {
     }
 
     resolvePath(dir, rPath='') {
+        if (this.config.ignoredFiles.includes(dir)) return null;
         if (fs.existsSync(dir)) return path.normalize(dir);
         for (const d of this.config.searchDirs) {
             const p = pathJoin(d, dir);

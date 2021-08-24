@@ -24,7 +24,8 @@ The json configuration file should contain a list of properties:
 ### Configuration properties
 - `headers`: An array of all the header files to encrypt.
 - `sources`: An array of all the source files to encrypt.
-- `outDir`: A folder where the encrypted files and information files will go.
+- `outDir`: A folder where the encrypted files will go.
+- `infoDir`: A folder where the information files will go.
 - `symbolOutPrefix`: A prefix for all encrypted identifiers.
 - `encryptFilenames`: `true`|`false`.
 - `fileOutPrefix`: A prefix for all encrypted filenames.

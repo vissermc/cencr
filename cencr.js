@@ -238,19 +238,19 @@ class Cencr {
     }
 
     saveHeaders() {
-        writeFile(pathJoin(this.config.outDir, 'headers.json'),
+        writeFile(pathJoin(this.config.infoDir, 'headers.json'),
             JSON.stringify(Object.keys(this.includeFiles))
         );
     }
 
     saveHeaderSymbols() {
-        writeFile(pathJoin(this.config.outDir, 'headerSymbols.json'),
+        writeFile(pathJoin(this.config.infoDir, 'headerSymbols.json'),
             JSON.stringify(Object.keys(this.headerSymbolMapping))
         );
     }
 
     saveFileMapping() {
-        writeFile(pathJoin(this.config.outDir, 'files.json'),
+        writeFile(pathJoin(this.config.infoDir, 'files.json'),
             JSON.stringify(this.fileMapping)
         );
     }
@@ -264,9 +264,11 @@ class Cencr {
         (this.config.excludedFiles || []).forEach(dir => this.processIncludeFile(dir));
         await this.extractSymbols();
         this.createHeaderSymbolsMapping();
-        this.saveHeaders();
-        this.saveHeaderSymbols();
-        this.saveFileMapping();
+        if (this.config.infoDir) {
+            this.saveHeaders();
+            this.saveHeaderSymbols();
+            this.saveFileMapping();
+        }
     }
 
     async encryptFiles() {

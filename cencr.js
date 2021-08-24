@@ -50,6 +50,7 @@ function numberToFilename(num, dir, prefix, ext) {
 
 class Cencr {
     sharedSymbols = {};
+    externalSymbols;
     includeFiles = {};
     headers;
     sources;
@@ -65,12 +66,12 @@ class Cencr {
         this.preventHeaderSymbolsToBeIgnored();
     }
 
-    pathToAbsolute(dir) {
-        if (dir[0] != '/') dir = pathJoin(this.workingDir, dir);
-        return dir;
+    pathToAbsolute(p) {
+        if (p[0] != '/') p = pathJoin(this.workingDir, p);
+        return p;
     }
 
-    fileExists(path) {
+    fileExists(p) {
         return fs.existsSync(this.pathToAbsolute(p));
     }
 
@@ -124,6 +125,7 @@ class Cencr {
     async parse(text, onInclude, onIdentifier, onToken) {
         let directive = null;
         let directiveText;
+        let lastType;
         var t = tokenize((src, token) => {
             const {type} = token;
             if (type != 'line comment' && type != 'area comment') {
@@ -146,13 +148,14 @@ class Cencr {
                     }
                 }
             }
-            if (type == 'identifier') {
+            if (type == 'identifier' && lastType != 'number') {
                 if (onIdentifier) {
                     const newVal = onIdentifier(src);
                     if (newVal != null) src = newVal;
                 }
             }
             if (onToken) onToken(src, type);
+            lastType = type;
         });
         if (text.length && text.charAt(text.length - 1) != "\n") text += "\n";
         return this.tokenize(text, t);
@@ -202,23 +205,23 @@ class Cencr {
             this.headers[file] = await this.extractSymbolsFromFile(file);
             addFileMapping(file);
         }
-        Object.entries(this.headers).forEach(e => this.filterOutExternalSymbols(e[1]));
 
+        for (const file of this.config.sources) {
+            this.sources[file] = await this.extractSymbolsFromFile(file);
+            addFileMapping(file);
+        }
+
+        this.externalSymbols = {...this.sharedSymbols};
+        Object.entries(this.headers).forEach(e => this.filterOutSharedSymbols(e[1]));
         for (const file of this.config.headers) {
             const symbols = this.headers[file];
             Object.assign(this.sharedSymbols, symbols);
         }
 
-
-        for (const file of this.config.sources) {
-            let symbols = await this.extractSymbolsFromFile(file);
-            this.filterOutExternalSymbols(symbols);
-            this.sources[file] = symbols;
-            addFileMapping(file);
-        }
+        Object.entries(this.sources).forEach(e => this.filterOutSharedSymbols(e[1]));
     }
 
-    filterOutExternalSymbols(symbols) {
+    filterOutSharedSymbols(symbols) {
         if (symbols == null) debugger
         Object.keys(this.sharedSymbols).forEach(k => delete symbols[k]);
     }
@@ -261,6 +264,12 @@ class Cencr {
         );
     }
 
+    saveExternalSymbols() {
+        this.writeFile(pathJoin(this.config.infoDir, 'externalSymbols.json'),
+            JSON.stringify(Object.keys(this.externalSymbols))
+        );
+    }
+
     saveFileMapping() {
         this.writeFile(pathJoin(this.config.infoDir, 'files.json'),
             JSON.stringify(this.fileMapping)
@@ -279,6 +288,7 @@ class Cencr {
         if (this.config.infoDir) {
             this.saveHeaders();
             this.saveHeaderSymbols();
+            this.saveExternalSymbols();
             this.saveFileMapping();
         }
     }

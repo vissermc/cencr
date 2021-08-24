@@ -9,7 +9,7 @@ The tool uses a tokenizer, but does not fully compile your code. Therefore, it d
 npm install -g
 
 ## Usage
-`cencr my_config.json`
+`cencr <my_config.json>`
 
 This will encrypt all files specified in the configuration file. It will also generate some json files with information about the encryption.
 

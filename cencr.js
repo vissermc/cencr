@@ -21,11 +21,6 @@ function pathJoin() {
     return [...arguments].filter(a => a != null && a.length).join('/');
 }
 
-function writeFile(dir, text) {
-    fs.mkdirSync(path.dirname(dir), {recursive: true});
-    fs.writeFileSync(dir, text);
-}
-
 function numberToName(num, isLocal = false) {
     let v = String.fromCharCode((isLocal ? 'a' : 'A').charCodeAt(0) + (num % 26));
     num = Math.floor(num / 26);
@@ -60,12 +55,29 @@ class Cencr {
     sources;
     headerSymbolMapping;
     fileMapping;
+    workingDir;
 
     constructor(configFile = 'config.json') {
+        this.workingDir = path.dirname(configFile);
         this.config = JSON.parse(fs.readFileSync(configFile, 'utf-8'));
         this.config.excludedSymbols.forEach(s => this.sharedSymbols[s] = true);
         reservedCppKeywords.forEach(s => this.sharedSymbols[s] = true);
         this.preventHeaderSymbolsToBeIgnored();
+    }
+
+    pathToAbsolute(dir) {
+        if (dir[0] != '/') dir = pathJoin(this.workingDir, dir);
+        return dir;
+    }
+
+    fileExists(path) {
+        return fs.existsSync(this.pathToAbsolute(p));
+    }
+
+    writeFile(dir, text) {
+        dir = this.pathToAbsolute(dir);
+        fs.mkdirSync(path.dirname(dir), {recursive: true});
+        fs.writeFileSync(dir, text);
     }
 
     preventHeaderSymbolsToBeIgnored() {
@@ -77,10 +89,10 @@ class Cencr {
 
     resolvePath(dir, rPath='') {
         if (this.config.ignoredFiles.includes(dir)) return null;
-        if (fs.existsSync(dir)) return path.normalize(dir);
+        if (this.fileExists(dir)) return path.normalize(dir);
         for (const d of this.config.searchDirs) {
             const p = pathJoin(d, dir);
-            if (fs.existsSync(p)) return path.normalize(p);
+            if (this.fileExists(p)) return path.normalize(p);
         }
         console.log(`${rPath} Cannot find file ${dir}. Skipping...`);
         return null;
@@ -88,7 +100,7 @@ class Cencr {
 
     readFile(dir) {
         const p = this.resolvePath(dir);
-        return p && fs.readFileSync(p, 'utf-8');
+        return p && fs.readFileSync(this.pathToAbsolute(p), 'utf-8');
     }
 
     async processIncludeFile(dir, rPath='') {
@@ -238,19 +250,19 @@ class Cencr {
     }
 
     saveHeaders() {
-        writeFile(pathJoin(this.config.infoDir, 'headers.json'),
+        this.writeFile(pathJoin(this.config.infoDir, 'headers.json'),
             JSON.stringify(Object.keys(this.includeFiles))
         );
     }
 
     saveHeaderSymbols() {
-        writeFile(pathJoin(this.config.infoDir, 'headerSymbols.json'),
+        this.writeFile(pathJoin(this.config.infoDir, 'headerSymbols.json'),
             JSON.stringify(Object.keys(this.headerSymbolMapping))
         );
     }
 
     saveFileMapping() {
-        writeFile(pathJoin(this.config.infoDir, 'files.json'),
+        this.writeFile(pathJoin(this.config.infoDir, 'files.json'),
             JSON.stringify(this.fileMapping)
         );
     }
@@ -285,7 +297,7 @@ class Cencr {
     async encryptFile(name, mapping) {
         const e = await this.encrypt(this.readFile(name), mapping, this.fileMapping);
         let p = pathJoin(this.config.outDir, this.fileMapping[name] || name);
-        writeFile(p, e);
+        this.writeFile(p, e);
     }
 
     async encrypt(text, mapping, fileMapping) {

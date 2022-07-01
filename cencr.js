@@ -311,6 +311,8 @@ class Cencr {
     }
 
     async encrypt(text, mapping, fileMapping) {
+        if (this.config.encryptSymbols === false)
+            mapping = {};
         let out = '';
         await this.parse(text,
             dir => fileMapping[dir] || dir,
